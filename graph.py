@@ -24,3 +24,11 @@ def prim_mst(d):
                 parent[v] = u
     return edges
 
+def shortcut(walk):
+    seen = set()
+    tour = []
+    for v in walk:
+        if v not in seen:
+            seen.add(v)
+            tour.append(v)
+    return tour
