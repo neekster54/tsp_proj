@@ -19,3 +19,9 @@ def validate_tour(d, tour):
     if sorted(tour) != list(range(n)):
         raise InvalidTour("tour must visit each city exactly once")
     return tour_length(d, tour)
+
+#test
+print(tour_length([[0, 1, 2], [1, 0, 3], [2, 3, 0]], [0, 1, 2]));
+print(validate_tour([[0, 1, 2], [1, 0, 3], [2, 3, 0]], [0, 1, 2]));
+print(validate_tour([[0, 1, 2], [1, 0, 3], [2, 3, 0]], [0, 1, 2, 3]));
+print(validate_tour([[0, 1, 2], [1, 0, 3], [2, 3, 0]], [0, 1, 3, 2]));
