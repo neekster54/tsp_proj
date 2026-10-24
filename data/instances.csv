@@ -2,7 +2,6 @@ name,source,optimum
 burma14,tsplib,3323
 ulysses16,tsplib,6859
 ulysses22,tsplib,7013
-bays29,tsplib,2020
 att48,tsplib,10628
 eil51,tsplib,426
 berlin52,tsplib,7542
