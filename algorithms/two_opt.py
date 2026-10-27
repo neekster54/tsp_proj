@@ -1,11 +1,14 @@
-def two_opt_first(graph: list[list[float]], path: list[int], error: float = 1e-9) -> list[int]:
+def two_opt_first(graph: list[list[float]], path: list[int], error: float = 1e-9) -> tuple[list[int], int]:
     """
     Implementation of First 2opt, applying swap immediately when a more favourable path is found
     """
     
-    # NEED TO ADD ERROR CHECKING
-    
     n = len(path)
+    if len(graph) == 0:
+        raise ValueError("Graph must contain at least one city.")
+    if len(graph) != n:
+        raise ValueError("Path must contain every city exactly once.")
+    
     path = path.copy()
     moves = 0
     
@@ -36,14 +39,17 @@ def two_opt_first(graph: list[list[float]], path: list[int], error: float = 1e-9
             return path, moves
         
         
-def two_opt_best(graph: list[list[float]], path: list[int], error: float = 1e-9) -> list[int]: 
+def two_opt_best(graph: list[list[float]], path: list[int], error: float = 1e-9) -> tuple[list[int], int]: 
     """
     Implementation of Best 2opt, applying swap only after you consider all possible permutations
     """
     
-    # NEED TO ADD ERROR CHECKING
-    
     n = len(path)
+    if len(graph) == 0:
+        raise ValueError("Graph must contain at least one city.")
+    if len(graph) != n:
+        raise ValueError("Path must contain every city exactly once.")
+    
     path = path.copy()
     moves = 0
 

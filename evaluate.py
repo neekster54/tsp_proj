@@ -53,9 +53,9 @@ def evaluate(instance: Instance, algorithm: str, reps: int = 10):
     }
     return row, tour, improved_tour
 
-if __name__ == "__main__":
-    burma = load_tsplib("data/tsplib/burma14.tsp", optimum=3323, name="burma14")
-    print(burma.name)
-    print(burma.optimum)
-    row, tour, improved_tour = evaluate(burma, "nearest_neighbour")
-    print(row)
+# if __name__ == "__main__":
+#     burma = load_tsplib("data/tsplib/burma14.tsp", optimum=3323, name="burma14")
+#     print(burma.name)
+#     print(burma.optimum)
+#     row, tour, improved_tour = evaluate(burma, "nearest_neighbour")
+#     print(row)
