@@ -14,13 +14,6 @@ def odd_degree_vertices(n, edges):
 
 
 def min_weight_perfect_matching(d, vertices):
-    """Minimum weight perfect matching on the complete graph over `vertices`.
-
-    Uses networkx's implementation of Edmonds' blossom algorithm, which
-    maximises (1 + max w) - w subject to maximum cardinality; on a complete
-    graph with an even number of vertices this is a minimum weight perfect
-    matching. O(k^3) for k vertices.
-    """
     g = nx.Graph()
     for a in range(len(vertices)):
         u = vertices[a]
@@ -34,11 +27,6 @@ def min_weight_perfect_matching(d, vertices):
 
 
 def christofides(d, start=0):
-    """MST + min weight perfect matching on odd-degree vertices, Euler tour, shortcut.
-
-    O(n^3) in the worst case because of the matching step. Length <= 3/2 * OPT
-    when d is metric.
-    """
     n = len(d)
     mst = prim_mst(d)
     matching = min_weight_perfect_matching(d, odd_degree_vertices(n, mst))
