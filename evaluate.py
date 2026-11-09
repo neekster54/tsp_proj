@@ -8,6 +8,7 @@ from algorithms.two_opt import two_opt_best
 from tsp.instance import Instance, load_tsplib
 from tsp.tour import validate_tour
 
+# added all algorithms
 TSP_ALGORITHMS = {
     "nearest_neighbour": nearest_neighbour,
     "double_tree": double_tree,
