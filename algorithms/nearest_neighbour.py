@@ -5,6 +5,11 @@ def nearest_neighbour(graph: list[list[float]], start: int = 0) -> list[int]:
     """
     
     n = len(graph)
+    if n == 0:
+        raise ValueError("Graph must contain at least one city.")
+    if not 0 <= start < n:
+        raise ValueError(f"Start must be between 0 and {n - 1}.")    
+    
     visited = [False] * n
     visited[start] = True
     path = [start]
@@ -21,7 +26,3 @@ def nearest_neighbour(graph: list[list[float]], start: int = 0) -> list[int]:
         current = best
     
     return path
-                
-if __name__ == "__main__":
-    print(nearest_neighbour([[0, 5, 7, 10], [5, 0, 2, 9], [7, 2, 0, 4], [10, 9, 4, 0]])) # [0, 1, 2, 3]
-    print(nearest_neighbour([[0, 5, 7, 10], [5, 0, 2, 1], [7, 2, 0, 4], [10, 1, 4, 0]])) # [0, 1, 3, 2]
