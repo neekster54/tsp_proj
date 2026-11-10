@@ -3,7 +3,7 @@ import csv
 import platform
 
 from tsp.instance import load_dataset
-from evaluate import evaluate, TSP_ALGORITHMS 
+from evaluate import evaluate, MAX_CITIES, TSP_ALGORITHMS
 
 OUTPUT_COLUMNS = [
     "instance", "n", "reps", "algorithm", "optimum", "length", "length_two_opt", "two_opt_moves", 
@@ -23,12 +23,16 @@ def main():
         writer.writeheader()
         for inst in load_dataset():
             for algorithm in TSP_ALGORITHMS:
-                try:
-                    row, _, _ = evaluate(inst, algorithm, reps=args.reps)
-                    row["status"] = "ok"
-                except Exception as exc:
+                if inst.n > MAX_CITIES.get(algorithm, inst.n):
                     row = {"instance": inst.name, "n": inst.n, "algorithm": algorithm,
-                           "status": f"failed: {exc!r}"}
+                           "status": f"skipped: n > {MAX_CITIES[algorithm]}"}
+                else:
+                    try:
+                        row, _, _ = evaluate(inst, algorithm, reps=args.reps)
+                        row["status"] = "ok"
+                    except Exception as exc:
+                        row = {"instance": inst.name, "n": inst.n, "algorithm": algorithm,
+                               "status": f"failed: {exc!r}"}
                 writer.writerow(row)
                 f.flush()
                 print(f"{inst.name:>10} {algorithm:>17} {row['status']:>4} ")
