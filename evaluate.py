@@ -1,6 +1,7 @@
 import statistics
 import time
 
+from algorithms.multi_start_nearest_neighbour import multi_start_nearest_neighbour
 from algorithms.nearest_neighbour import nearest_neighbour
 from algorithms.two_opt import two_opt_best
 from tsp.instance import Instance, load_tsplib
@@ -8,6 +9,7 @@ from tsp.tour import validate_tour
 
 TSP_ALGORITHMS = {
     "nearest_neighbour": nearest_neighbour,
+    "multi_start_nn": multi_start_nearest_neighbour,
 }
 
 def measure_time(fn, *args):
