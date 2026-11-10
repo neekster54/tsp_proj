@@ -18,6 +18,7 @@ TSP_ALGORITHMS = {
     "multi_start_nn": multi_start_nearest_neighbour,
     "double_tree": double_tree,
     "greedy_edge": greedy_edge,
+    "christofides": christofides,
     "held_karp": held_karp,
 }
 
