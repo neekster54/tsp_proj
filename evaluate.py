@@ -1,9 +1,12 @@
 import statistics
 import time
 
+from algorithms.multi_start_nearest_neighbour import multi_start_nearest_neighbour
 from algorithms.nearest_neighbour import nearest_neighbour
 from algorithms.double_tree import double_tree
 from algorithms.christofides import christofides
+from algorithms.greedy_edge import greedy_edge
+from algorithms.held_karp import held_karp
 from algorithms.two_opt import two_opt_best
 from algorithms.three_opt import three_opt_best
 from tsp.instance import Instance, load_tsplib
@@ -12,9 +15,14 @@ from tsp.tour import validate_tour
 # added all algorithms
 TSP_ALGORITHMS = {
     "nearest_neighbour": nearest_neighbour,
+    "multi_start_nn": multi_start_nearest_neighbour,
     "double_tree": double_tree,
-    "christofides": christofides
+    "greedy_edge": greedy_edge,
+    "held_karp": held_karp,
 }
+
+# Largest instance each algorithm is run on, unlisted algorithms have no limit.
+MAX_CITIES = {"held_karp": 22}
 
 def measure_time(fn, *args):
     """Simple timing function"""
