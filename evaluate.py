@@ -1,6 +1,7 @@
 import statistics
 import time
 
+from algorithms.multi_start_nearest_neighbour import multi_start_nearest_neighbour
 from algorithms.nearest_neighbour import nearest_neighbour
 from algorithms.double_tree import double_tree
 from algorithms.christofides import christofides
@@ -13,6 +14,7 @@ from tsp.tour import validate_tour
 # added all algorithms
 TSP_ALGORITHMS = {
     "nearest_neighbour": nearest_neighbour,
+    "multi_start_nn": multi_start_nearest_neighbour,
     "double_tree": double_tree,
     "greedy_edge": greedy_edge,
     "held_karp": held_karp,
