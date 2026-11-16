@@ -1,18 +1,3 @@
-"""Generate sparse test graphs by removing edges from the TSPLIB instances.
-
-Each graph keeps a planted Hamiltonian cycle (by default the instance's optimal tour,
-so the published optimum stays valid) plus extra edges chosen by one of two modes:
-
-  nearest  keep each city's shortest edges (road-network-like; deterministic)
-  random   keep uniformly random edges (one graph per seed)
-
-The edge-to-vertex ratio m/n is the controlled variable. Graphs go to data/sparse/
-as <name>.edges files, listed with their statistics in data/sparse/index.csv.
-
-    python generate_sparse.py
-    python generate_sparse.py --ratios 1.2 1.5 2 4 8 --modes nearest --instances berlin52 kroA100
-"""
-
 import argparse
 import csv
 import random
@@ -22,11 +7,11 @@ from pathlib import Path
 from tsp.instance import load_dataset
 from tsp.sparse import MODES, cycle_edges, load_opt_tour, nearest_edges, sparsify, target_edges, write_edges
 
+# key properties of graphs
 INDEX_COLUMNS = [
     "name", "base", "mode", "ratio", "seed", "plant", "n", "m", "edge_vertex_ratio",
     "avg_degree", "min_degree", "max_degree", "planted_share", "forced_edges", "optimum", "file",
 ]
-
 
 def degree_stats(n, edges):
     degree = Counter()
@@ -37,6 +22,7 @@ def degree_stats(n, edges):
 
 
 def main():
+    # make it easy to customise graph generation
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--ratios", type=float, nargs="+", default=[1.25, 1.5, 2, 3, 5, 10],
                         help="edge-to-vertex ratios m/n to generate (each >= 1)")
@@ -63,8 +49,9 @@ def main():
                 continue
 
         for mode in args.modes:
-            # Deterministic graphs need only one seed.
             seeds = range(args.seeds) if mode == "random" or args.plant == "random" else [0]
+            
+            # control the level of sparcity for each graph
             for ratio in args.ratios:
                 m = target_edges(n, ratio)
                 if m is None:
@@ -79,11 +66,7 @@ def main():
                         optimum = None
                     rng = random.Random(f"{inst.name}-{mode}-{ratio:g}-{seed}")
                     edges = sparsify(d, ratio, mode, planted, rng)
-
-                    # Planted edges the mode would not have picked by itself: a measure of
-                    # how much the planted cycle shapes the graph.
                     forced = len(cycle_edges(planted) - nearest_edges(d, m)) if mode == "nearest" else ""
-
                     name = f"{inst.name}_{mode}_r{ratio:g}_s{seed}"
                     write_edges(out / f"{name}.edges", d, edges)
                     min_deg, max_deg = degree_stats(n, edges)

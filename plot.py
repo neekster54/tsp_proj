@@ -1,20 +1,3 @@
-"""Make graphs from an evaluation results CSV (the output of run_evaluation.py).
-
-Styled to match the LaTeX/pgfplots figures in the progression review: Computer Modern
-serif text, marks only, boxed axes with inward ticks, and a small framed legend.
-
-Usage:
-    python plot_results.py                          # results/TESTRUN.csv
-    python plot_results.py results/my_run.csv       # any results CSV
-    python plot_results.py results/TESTRUN.csv --out plots --show
-
-Writes these PNGs into the output directory (default: results/plots/<csv name>/):
-    1_error_vs_n.png           error vs. n: constructed tour, after 2-opt, after 3-opt
-    2_mean_error_by_stage.png  mean error per algorithm at each improvement stage
-    3_runtime_vs_n.png         construction time and 2-opt time vs. n (log-log)
-    4_error_heatmap.png        construction error for every instance x algorithm
-"""
-
 import argparse
 from pathlib import Path
 
@@ -24,9 +7,8 @@ import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.ticker import LogLocator, MaxNLocator, NullFormatter
 
-# pgfplots-style marks. NN / DT / CS use exactly the colours and marks of the report.
+# graph colours
 ALGORITHMS = {
-    # name:              (label,  colour,    marker)
     "nearest_neighbour": ("NN",   "#0000ff", "o"),
     "double_tree":       ("DT",   "#ff0000", "s"),
     "christofides":      ("CS",   "#008000", "^"),
@@ -35,7 +17,7 @@ ALGORITHMS = {
     "held_karp":         ("HK",   "#000000", "x"),
 }
 FALLBACK = [("#00bfbf", "v"), ("#ff8000", "<"), ("#808080", ">")]
-EXACT = {"held_karp"}  # always 0% error, so left out of the error plots
+EXACT = {"held_karp"} 
 
 STAGES = [
     ("error", "Constructed tour", "init"),
@@ -138,12 +120,10 @@ def legend(ax, loc, source=None):
     handles, labels = (source or ax).get_legend_handles_labels()
     ax.legend(handles, labels, loc=loc, handletextpad=0.1, borderpad=0.25)
 
-
+# plot approximation error against the number of cities
 def plot_error_vs_n(df, algos, styles, out):
     algos = [a for a in algos if a not in EXACT]
     stages = [s for s in STAGES if s[0] in df.columns and df[s[0]].notna().any()]
-    # Each panel gets its own x and y range, fitted to its data, so that the small
-    # errors after 2-opt / 3-opt are not squashed against zero by the construction panel.
     fig, axes = plt.subplots(1, len(stages), figsize=(3.0 * len(stages), 2.3))
     axes = np.atleast_1d(axes)
     for ax, (col, title, _) in zip(axes, stages):
@@ -164,11 +144,10 @@ def plot_error_vs_n(df, algos, styles, out):
     fig.tight_layout(w_pad=1.0)
     save(fig, out / "1_error_vs_n")
 
-
+# compare the mean approximation error of each algorithm before and after local search
 def plot_mean_error_by_stage(df, algos, styles, out):
     algos = [a for a in algos if a not in EXACT]
     stages = [s for s in STAGES if s[0] in df.columns and df[s[0]].notna().any()]
-    # Only average over instances that have every stage, so the bars are comparable.
     complete = df[df["algorithm"].isin(algos)].dropna(subset=[s[0] for s in stages])
     algos = [a for a in algos if a in complete["algorithm"].values]
     means = complete.groupby("algorithm")[[s[0] for s in stages]].mean().loc[algos]
@@ -178,7 +157,6 @@ def plot_mean_error_by_stage(df, algos, styles, out):
     x = np.arange(len(algos))
     for i, ((col, _, short), colour) in enumerate(zip(stages, STAGE_COLOURS)):
         pos = x - 0.4 + width * (i + 0.5)
-        # pgfplots ybar look: coloured outline, light fill of the same colour.
         bars = ax.bar(pos, means[col], width * 0.85, color=colour + "4d", edgecolor=colour,
                       linewidth=0.6, label=short, zorder=2)
         for bar, v in zip(bars, means[col]):
@@ -199,7 +177,7 @@ def plot_mean_error_by_stage(df, algos, styles, out):
     fig.tight_layout()
     save(fig, out / "2_mean_error_by_stage")
 
-
+# plot algorithm construction and 2-opt running times against the number of cities
 def plot_runtime_vs_n(df, algos, styles, out):
     panels = [("algo_time", "Construction time", algos)]
     if "two_opt_time" in df.columns and df["two_opt_time"].notna().any():
@@ -219,11 +197,9 @@ def plot_runtime_vs_n(df, algos, styles, out):
         ax.set_title(title)
         sub = df[df["algorithm"].isin(show) & df[col].notna()]
         fit_n_axis(ax, sub["n"])
-        # Own y range per panel, padded by a fraction of a decade on each side.
         lo, hi = np.log10(sub[col].min()), np.log10(sub[col].max())
         pad = 0.06 * (hi - lo)
         ax.set_ylim(10 ** (lo - pad), 10 ** (hi + pad))
-        # Label every decade, or every other / third one on tall ranges, like the report.
         decades = np.arange(np.ceil(lo - pad), np.floor(hi + pad) + 1)
         step = 3 if len(decades) > 6 else 2 if len(decades) > 4 else 1
         ax.set_yticks(10.0 ** decades[decades % step == 0])
@@ -233,7 +209,7 @@ def plot_runtime_vs_n(df, algos, styles, out):
     fig.tight_layout(w_pad=1.0)
     save(fig, out / "3_runtime_vs_n")
 
-
+# plot a heatmap comparing the constructed tour error of each algorithm across instance
 def plot_error_heatmap(df, algos, styles, out):
     algos = [a for a in algos
              if a not in EXACT and df.loc[df["algorithm"] == a, "error"].notna().sum() > 3]
@@ -271,6 +247,7 @@ def save(fig, stem):
 
 
 def main():
+    # allow the plot to be customised
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("csv", nargs="?", default="results/TESTRUN.csv")
     parser.add_argument("--out", help="output directory (default: results/plots/<csv name>)")

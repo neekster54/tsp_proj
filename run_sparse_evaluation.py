@@ -1,20 +1,3 @@
-"""Compare the algorithms on sparse graphs, with and without metric closure.
-
-For every graph in data/sparse/index.csv (see generate_sparse.py) and every algorithm:
-
-  raw      run the algorithm on the sparse graph as is (missing edges = inf) and record
-           whether its tour, and the tour after 2-opt, uses only edges that exist.
-  closure  run it on the metric closure (shortest-path distances), apply 2-opt, expand
-           the tour back into a closed walk in the sparse graph, and record its length,
-           error against the optimum and the number of repeated city visits.
-
-Each base instance is also run on its original complete graph (mode "complete") as a
-baseline. Results go to results/sparse_results.csv and a summary table is printed.
-
-    python run_sparse_evaluation.py
-    python run_sparse_evaluation.py --max-n 1002 --algorithms christofides greedy_edge
-"""
-
 import argparse
 import csv
 import math
