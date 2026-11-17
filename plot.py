@@ -248,7 +248,7 @@ def save(fig, stem):
 
 def main():
     # allow the plot to be customised
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description="Make graphs from an evaluation results CSV.")
     parser.add_argument("csv", nargs="?", default="results/TESTRUN.csv")
     parser.add_argument("--out", help="output directory (default: results/plots/<csv name>)")
     parser.add_argument("--show", action="store_true", help="also open the figures in a window")
