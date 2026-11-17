@@ -14,14 +14,9 @@ from tsp.tour import tour_length, validate_tour
 DEFAULT_ALGORITHMS = ["nearest_neighbour", "greedy_edge", "double_tree", "christofides"]
 OUTPUT_COLUMNS = [
     "name", "base", "mode", "ratio", "seed", "n", "m", "edge_vertex_ratio", "algorithm", "optimum",
-    "raw_valid", "raw_valid_two_opt", "closure_time", "length", "length_two_opt", "error",
+    "closure_time", "length", "length_two_opt", "error",
     "error_two_opt", "extra_visits", "extra_visits_two_opt", "algo_time", "two_opt_time", "status",
 ]
-
-
-def uses_only_real_edges(d, tour):
-    n = len(tour)
-    return all(d[tour[i]][tour[(i + 1) % n]] != math.inf for i in range(n))
 
 
 def timed(fn, *args):
@@ -55,13 +50,8 @@ def evaluate_graph(meta, inst, algorithms, closure):
         try:
             if closure is None:  # complete graph: the plain TSP, nothing to repair
                 dist, pred, seconds = inst.d, None, 0.0
-                row.update(raw_valid=True, raw_valid_two_opt=True)
             else:
                 dist, pred, seconds = closure
-                raw = TSP_ALGORITHMS[algorithm](inst.d)
-                raw_improved, _ = two_opt_best(inst.d, raw)
-                row.update(raw_valid=uses_only_real_edges(inst.d, raw),
-                           raw_valid_two_opt=uses_only_real_edges(inst.d, raw_improved))
             row["closure_time"] = seconds
             if pred is None:
                 tour, algo_time = timed(TSP_ALGORITHMS[algorithm], dist)
@@ -93,8 +83,8 @@ def summarise(rows):
         keys = sorted({k[1] for k in groups if k[0] == mode})
         if not keys:
             continue
-        print(f"\n{mode}: raw tours valid after 2-opt | closure error after 2-opt | extra visits per city")
-        print(f"{'m/n':>7} " + "".join(f"{a[:18]:>30}" for a in algorithms))
+        print(f"\n{mode}: error after 2-opt | extra visits per city")
+        print(f"{'m/n':>7} " + "".join(f"{a[:18]:>22}" for a in algorithms))
         for ratio in (keys if mode != "complete" else [None]):
             cells = []
             for a in algorithms:
@@ -103,12 +93,11 @@ def summarise(rows):
                 if not rs:
                     cells.append("-")
                     continue
-                valid = 100 * sum(r["raw_valid_two_opt"] for r in rs) / len(rs)
                 err = statistics.mean(r["error_two_opt"] for r in rs)
                 extra = statistics.mean(r["extra_visits_two_opt"] / int(r["n"]) for r in rs)
-                cells.append(f"{valid:4.0f}% | {err:5.2f}% | {extra:4.2f}")
+                cells.append(f"{err:5.2f}% | {extra:4.2f}")
             label = "all" if ratio is None else f"{ratio:g}"
-            print(f"{label:>7} " + "".join(f"{c:>30}" for c in cells))
+            print(f"{label:>7} " + "".join(f"{c:>22}" for c in cells))
 
 
 def main():
