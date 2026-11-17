@@ -158,7 +158,9 @@ def load_sparse(path, n, name=None, optimum=None, base=None):
     coords = None
     if base is not None:
         problem = tsplib95.load(str(DATA_DIR / "tsplib" / f"{base}.tsp"))
-        coords = [tuple(problem.node_coords[v]) for v in sorted(problem.get_nodes())] or None
+        coords = [tuple(problem.node_coords[v]) for v in sorted(problem.get_nodes())]
+        if len(coords) != n:
+            coords = None 
     return Instance(name or Path(path).stem, d, optimum, coords)
 
 
