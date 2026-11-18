@@ -101,6 +101,23 @@ def marks(ax, x, y, style, **kw):
             **kw)
 
 
+def trend(ax, x, y, style, name, log_y=False, min_points=4):
+    _, colour, marker = style
+    fit = len(x) >= min_points and x.nunique() > 1
+    marks(ax, x, y, style, alpha=0.3 if fit else 1.0, markersize=3, zorder=2)
+    if fit:
+        lx = np.log10(x.to_numpy(dtype=float))
+        ly = np.log10(y.to_numpy(dtype=float)) if log_y else y.to_numpy(dtype=float)
+        slope, intercept = np.polyfit(lx, ly, 1)
+        xs = np.linspace(lx.min(), lx.max(), 50)
+        line = slope * xs + intercept
+        ax.plot(10 ** xs, 10 ** line if log_y else np.clip(line, 0, None), color=colour,
+                linewidth=1.1, zorder=3)
+    filled = marker not in ("x", "+")
+    ax.plot([], [], color=colour, marker=marker, markersize=4, linewidth=1.1 if fit else 0,
+            markerfacecolor=colour if filled else "none", label=name)
+
+
 def log_n_axis(ax):
     ax.set_xscale("log")
     ax.xaxis.set_major_locator(LogLocator(base=10))
@@ -124,13 +141,13 @@ def legend(ax, loc, source=None):
 def plot_error_vs_n(df, algos, styles, out):
     algos = [a for a in algos if a not in EXACT]
     stages = [s for s in STAGES if s[0] in df.columns and df[s[0]].notna().any()]
-    fig, axes = plt.subplots(1, len(stages), figsize=(3.0 * len(stages), 2.3))
+    fig, axes = plt.subplots(1, len(stages), figsize=(4.2 * len(stages), 3.2))
     axes = np.atleast_1d(axes)
     for ax, (col, title, _) in zip(axes, stages):
         sub = df[df["algorithm"].isin(algos) & df[col].notna()]
         for algo in algos:
             g = sub[sub["algorithm"] == algo]
-            marks(ax, g["n"], g[col], styles[algo], label=label(styles, algo))
+            trend(ax, g["n"], g[col], styles[algo], label(styles, algo))
         ax.set_title(title if sub["n"].max() == df["n"].max()
                      else f"{title} ($n \\leq {sub['n'].max()}$)")
         log_n_axis(ax)
@@ -183,12 +200,12 @@ def plot_runtime_vs_n(df, algos, styles, out):
     if "two_opt_time" in df.columns and df["two_opt_time"].notna().any():
         panels.append(("two_opt_time", "2-opt time (from each start)",
                        [a for a in algos if a not in EXACT]))
-    fig, axes = plt.subplots(1, len(panels), figsize=(3.0 * len(panels), 2.3))
+    fig, axes = plt.subplots(1, len(panels), figsize=(4.2 * len(panels), 3.2))
     axes = np.atleast_1d(axes)
     for ax, (col, title, show) in zip(axes, panels):
         for algo in show:
             g = df[(df["algorithm"] == algo) & df[col].notna()]
-            marks(ax, g["n"], g[col], styles[algo], label=label(styles, algo))
+            trend(ax, g["n"], g[col], styles[algo], label(styles, algo), log_y=True)
         log_n_axis(ax)
         ax.set_yscale("log")
         ax.yaxis.set_major_locator(LogLocator(base=10, numticks=20))
@@ -205,7 +222,8 @@ def plot_runtime_vs_n(df, algos, styles, out):
         ax.set_yticks(10.0 ** decades[decades % step == 0])
         ax.set_ylim(10 ** (lo - pad), 10 ** (hi + pad))
     axes[0].set_ylabel("median time (s)")
-    legend(axes[-1], "lower right", source=axes[0])
+    legend(axes[-1], "upper left", source=axes[0])
+    axes[-1].get_legend().set_bbox_to_anchor((1.02, 1.0))
     fig.tight_layout(w_pad=1.0)
     save(fig, out / "3_runtime_vs_n")
 
